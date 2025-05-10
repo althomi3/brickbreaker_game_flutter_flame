@@ -27,6 +27,7 @@ class Brick extends RectangleComponent // extends Rectangle and uses collision d
 
     // win the game:
     if (game.world.children.query<Brick>().length == 1) { // defines to remove all bricks when there is only one brick left
+      game.playState = PlayState.won;  // sets game state to won when bricks removed
       game.world.removeAll(game.world.children.query<Ball>()); // removes ball
       game.world.removeAll(game.world.children.query<Bat>()); // removes bat
     }
