@@ -11,9 +11,11 @@ import 'package:flutter/services.dart';
 import 'components/components.dart';
 import 'config.dart';
 
+enum PlayState { welcome, playing, gameOver, won } // defines play states
+
 // defines our game by extending FlameGame
 // adds mixins to work with collision detection and get keyboard interaction, e.g., to move bat
-class BrickBreaker extends FlameGame with HasCollisionDetection, KeyboardEvents {
+class BrickBreaker extends FlameGame with HasCollisionDetection, KeyboardEvents, TapDetector {
   BrickBreaker()
       : super(
           camera: CameraComponent.withFixedResolution(
@@ -26,6 +28,23 @@ class BrickBreaker extends FlameGame with HasCollisionDetection, KeyboardEvents 
   double get width => size.x;
   double get height => size.y;
 
+  // switch-case condition that swithces game states and shows differen screens / removes them accordingly
+  late PlayState _playState;                                   
+  PlayState get playState => _playState;
+  set playState(PlayState playState) {
+    _playState = playState;
+    switch (playState) {
+      case PlayState.welcome:
+      case PlayState.gameOver:
+      case PlayState.won:
+        overlays.add(playState.name);
+      case PlayState.playing:
+        overlays.remove(PlayState.welcome.name);
+        overlays.remove(PlayState.gameOver.name);
+        overlays.remove(PlayState.won.name);
+    }
+  }
+
   @override
   FutureOr<void> onLoad() async {
     super.onLoad();
@@ -33,6 +52,20 @@ class BrickBreaker extends FlameGame with HasCollisionDetection, KeyboardEvents 
     camera.viewfinder.anchor = Anchor.topLeft; // anchors viewfinder to top left
 
     world.add(PlayArea()); // ads play area which defines the game dimensions
+
+    playState = PlayState.welcome; // ads welcome screen to world
+
+  }
+
+  // defines what to show on game start
+  void startGame() {
+    if (playState == PlayState.playing) return;
+
+    world.removeAll(world.children.query<Ball>());
+    world.removeAll(world.children.query<Bat>());
+    world.removeAll(world.children.query<Brick>());
+
+    playState = PlayState.playing;  
 
     // adds play ball
     world.add(Ball(                // instantiates the ball we created in ball.dart and adds values for props that were defined in constructor                              
@@ -49,7 +82,7 @@ class BrickBreaker extends FlameGame with HasCollisionDetection, KeyboardEvents 
         position: Vector2(width / 2, height * 0.95)));
     
     // adds bricks to the world
-    await world.addAll([                                        
+    world.addAll([                                        
       for (var i = 0; i < brickColors.length; i++) // creates as many bricks in the row as there are colors
         for (var j = 1; j <= 5; j++) // creates 5 rows
           Brick(
@@ -61,9 +94,16 @@ class BrickBreaker extends FlameGame with HasCollisionDetection, KeyboardEvents 
           ),
     ]);    
 
-    debugMode = true; 
+    // debugMode = true; enable if you want to see debug annotations in game, e.g., dimensions of components
 
   }
+
+  // defines what happens on tap = starts game
+  @override                                                     
+  void onTap() {
+    super.onTap();
+    startGame();
+  }    
 
   @override // defines functionality for key interaction                                                   
   KeyEventResult onKeyEvent(
@@ -74,8 +114,16 @@ class BrickBreaker extends FlameGame with HasCollisionDetection, KeyboardEvents 
         world.children.query<Bat>().first.moveBy(-batStep); // uses bat step which is defined as a const in config.dart
       case LogicalKeyboardKey.arrowRight:
         world.children.query<Bat>().first.moveBy(batStep);
+
+      // on space or enter, the game is started
+      case LogicalKeyboardKey.space:                            
+      case LogicalKeyboardKey.enter:
+        startGame(); 
     }
     return KeyEventResult.handled;
-  }        
+  }    
+
+  @override
+  Color backgroundColor() => const Color(0xfff2e8cf);    
   
 }

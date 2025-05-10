@@ -51,6 +51,9 @@ class Ball extends CircleComponent with CollisionCallbacks, HasGameReference<Bri
       } else if (intersectionPoints.first.y >= game.height) {
         add(RemoveEffect( // removes ball from game world                                      
           delay: 0.35,
+          onComplete: () {                                    
+              game.playState = PlayState.gameOver; // set gamestate to gameOver when ball removed
+          }
         ));
       }
 
