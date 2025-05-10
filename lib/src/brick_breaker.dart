@@ -2,15 +2,18 @@
 
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
-import 'dart:math' as math; // Add this import
+import 'dart:math' as math;
+import 'package:flame/events.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 
 import 'components/components.dart';
 import 'config.dart';
 
 // defines our game by extending FlameGame
-
-class BrickBreaker extends FlameGame with HasCollisionDetection {
+// adds mixins to work with collision detection and get keyboard interaction, e.g., to move bat
+class BrickBreaker extends FlameGame with HasCollisionDetection, KeyboardEvents {
   BrickBreaker()
       : super(
           camera: CameraComponent.withFixedResolution(
@@ -39,8 +42,26 @@ class BrickBreaker extends FlameGame with HasCollisionDetection {
               .normalized() // normalized vector and keeps speed consistent
             ..scale(height / 4))); // scales up velocity to be 1/4th of screen height
 
+    world.add(Bat(                                              // Add from here...
+        size: Vector2(batWidth, batHeight),
+        cornerRadius: const Radius.circular(ballRadius / 2),
+        position: Vector2(width / 2, height * 0.95)));
+
       debugMode = true; 
 
   }
+
+  @override // defines functionality for key interaction                                                   
+  KeyEventResult onKeyEvent(
+      KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    super.onKeyEvent(event, keysPressed);
+    switch (event.logicalKey) {
+      case LogicalKeyboardKey.arrowLeft:
+        world.children.query<Bat>().first.moveBy(-batStep); // uses bat step which is defined as a const in config.dart
+      case LogicalKeyboardKey.arrowRight:
+        world.children.query<Bat>().first.moveBy(batStep);
+    }
+    return KeyEventResult.handled;
+  }        
   
 }

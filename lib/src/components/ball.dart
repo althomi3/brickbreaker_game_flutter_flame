@@ -1,6 +1,8 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/collisions.dart';
+import 'package:flame/effects.dart';
+import 'bat.dart';
 
 import '../brick_breaker.dart';                                 // And this import
 import 'play_area.dart';
@@ -42,9 +44,17 @@ class Ball extends CircleComponent with CollisionCallbacks, HasGameReference<Bri
       } else if (intersectionPoints.first.x >= game.width) {
         velocity.x = -velocity.x;
       } else if (intersectionPoints.first.y >= game.height) {
-        removeFromParent();
+        add(RemoveEffect( // removes ball from game world                                      
+          delay: 0.35,
+        ));
       }
-    } else {
+    } else if (other is Bat) { // if ball collides with bat, then the velocity and position are adjusted
+      velocity.y = -velocity.y; // y velocity is reversed to that ball is kicked up
+      velocity.x = velocity.x + // x velocity is adjusted so that ball gets a new angle
+          (position.x - other.position.x) / other.size.x * game.width * 0.3;
+
+      }
+     else {
       debugPrint('collision with $other');
     }
   }    
