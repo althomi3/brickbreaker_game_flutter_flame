@@ -24,6 +24,7 @@ class Brick extends RectangleComponent // extends Rectangle and uses collision d
       Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollisionStart(intersectionPoints, other);
     removeFromParent(); // brick will be removed
+    game.score.value++; // increase score when brick brocken
 
     // win the game:
     if (game.world.children.query<Brick>().length == 1) { // defines to remove all bricks when there is only one brick left

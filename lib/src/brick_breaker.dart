@@ -24,6 +24,7 @@ class BrickBreaker extends FlameGame with HasCollisionDetection, KeyboardEvents,
           ),
         );
 
+  final ValueNotifier<int> score = ValueNotifier(0); // defines score object
   final rand = math.Random();  
   double get width => size.x;
   double get height => size.y;
@@ -66,6 +67,7 @@ class BrickBreaker extends FlameGame with HasCollisionDetection, KeyboardEvents,
     world.removeAll(world.children.query<Brick>());
 
     playState = PlayState.playing;  
+    score.value = 0; // sets score to 0
 
     // adds play ball
     world.add(Ball(                // instantiates the ball we created in ball.dart and adds values for props that were defined in constructor                              
