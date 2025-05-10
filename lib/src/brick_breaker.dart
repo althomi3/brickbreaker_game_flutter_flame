@@ -1,4 +1,4 @@
-   import 'dart:async';
+import 'dart:async';
 
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
@@ -36,18 +36,32 @@ class BrickBreaker extends FlameGame with HasCollisionDetection, KeyboardEvents 
 
     // adds play ball
     world.add(Ball(                // instantiates the ball we created in ball.dart and adds values for props that were defined in constructor                              
+          difficultyModifier: difficultyModifier,
           radius: ballRadius,
           position: size / 2, // centers the ball's position
           velocity: Vector2((rand.nextDouble() - 0.5) * width, height * 0.2) // sets a random velocity for x and defines velocity for y
               .normalized() // normalized vector and keeps speed consistent
             ..scale(height / 4))); // scales up velocity to be 1/4th of screen height
 
-    world.add(Bat(                                              // Add from here...
+    world.add(Bat(                                              
         size: Vector2(batWidth, batHeight),
         cornerRadius: const Radius.circular(ballRadius / 2),
         position: Vector2(width / 2, height * 0.95)));
+    
+    // adds bricks to the world
+    await world.addAll([                                        
+      for (var i = 0; i < brickColors.length; i++) // creates as many bricks in the row as there are colors
+        for (var j = 1; j <= 5; j++) // creates 5 rows
+          Brick(
+            position: Vector2( // positions bricks
+              (i + 0.5) * brickWidth + (i + 1) * brickGutter,
+              (j + 2.0) * brickHeight + j * brickGutter,
+            ),
+            color: brickColors[i],
+          ),
+    ]);    
 
-      debugMode = true; 
+    debugMode = true; 
 
   }
 
